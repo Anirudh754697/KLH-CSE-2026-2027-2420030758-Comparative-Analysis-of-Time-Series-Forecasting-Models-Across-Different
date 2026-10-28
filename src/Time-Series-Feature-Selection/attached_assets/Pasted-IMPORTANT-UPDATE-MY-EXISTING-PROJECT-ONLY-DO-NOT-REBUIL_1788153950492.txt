@@ -1,0 +1,386 @@
+IMPORTANT: UPDATE MY EXISTING PROJECT ONLY. DO NOT REBUILD IT.
+
+My current Streamlit project "Dataset-Adaptive Feature Engineering and Selection for Time-Series Forecasting" is already working correctly with the NN5 benchmark dataset.
+
+I now want to extend the EXISTING project to properly support the M4 and M5 benchmark datasets as well.
+
+DO NOT:
+- rebuild the application
+- redesign the UI
+- remove existing NN5 functionality
+- replace the current forecasting/feature-selection pipeline
+- create fake benchmark data
+- create fake results
+- hard-code benchmark results
+- add unnecessary deep learning models
+
+Keep everything that already works.
+
+==================================================
+MAIN REQUIREMENT
+==================================================
+
+The project should support:
+
+1. NN5
+2. M4
+3. M5
+
+The same downstream methodology should be used for all three:
+
+Dataset
+→ Validation
+→ EDA
+→ Preprocessing
+→ Feature Engineering
+→ Feature Selection
+→ Forecasting
+→ Evaluation
+
+The purpose of the project remains:
+
+"Identify which engineered features are useful for forecasting and determine whether a smaller, dataset/series-adaptive feature subset can maintain or improve forecasting performance."
+
+==================================================
+IMPORTANT: M5 IS A MULTI-FILE DATASET
+==================================================
+
+Do NOT treat M5 as a single CSV.
+
+The standard M5 benchmark consists of multiple related files, commonly:
+
+- sales_train_validation.csv
+- calendar.csv
+- sell_prices.csv
+
+The application must support these files together.
+
+Update the Streamlit UI so that when M5 is selected, the user can upload the required M5 files separately.
+
+For example:
+
+M5 Dataset
+
+Sales data:
+[Upload sales_train_validation.csv]
+
+Calendar:
+[Upload calendar.csv]
+
+Prices:
+[Upload sell_prices.csv]
+
+The application should then process the uploaded files together.
+
+==================================================
+M5 DATA PROCESSING
+==================================================
+
+Create an M5-specific adapter/parser.
+
+The adapter should:
+
+1. Read the M5 sales file.
+2. Read the calendar file.
+3. Read the sell_prices file when available/needed.
+4. Correctly reconstruct the time index.
+5. Allow the user to select a specific M5 series/item/store combination.
+6. Convert the selected series into the common internal representation used by the existing pipeline.
+
+Conceptually the common format should be:
+
+date | series_id | target
+
+For M5:
+
+date = actual date from calendar.csv
+series_id = selected item/store series
+target = sales quantity
+
+Do NOT unnecessarily process the entire M5 dataset.
+
+M5 is large, so process only the selected series whenever possible.
+
+==================================================
+M5 SERIES SELECTION
+==================================================
+
+After uploading the M5 files, provide appropriate controls for selecting a series.
+
+For example, allow selection based on:
+
+- item_id
+- store_id
+- state_id
+
+or a combined identifier such as:
+
+FOODS_1_001_CA_1
+
+The exact controls should depend on the actual M5 file structure.
+
+The selected series should then be passed into the EXISTING pipeline.
+
+==================================================
+M4 SUPPORT
+==================================================
+
+Add M4 as another supported benchmark.
+
+M4 may also be supplied in different CSV/XLSX formats.
+
+Create an M4 adapter that converts the actual uploaded M4 data into:
+
+date/period | series_id | target
+
+Do not fabricate M4 data.
+
+Allow selection of an M4 series.
+
+If the uploaded file structure cannot be recognized, show a useful error explaining what format is expected.
+
+==================================================
+COMMON ADAPTER ARCHITECTURE
+==================================================
+
+Do not create three completely separate forecasting pipelines.
+
+Instead use dataset-specific adapters:
+
+NN5 adapter
+M4 adapter
+M5 adapter
+
+All three should output the same internal representation.
+
+Conceptually:
+
+NN5 ──> NN5 Adapter ──┐
+M4  ──> M4 Adapter ───┼──> Common Time-Series Data
+M5  ──> M5 Adapter ───┘             ↓
+                                   EDA
+                                    ↓
+                              Preprocessing
+                                    ↓
+                          Feature Engineering
+                                    ↓
+                           Feature Selection
+                                    ↓
+                              Forecasting
+                                    ↓
+                              Evaluation
+
+This is important because the research should compare the same methodology across different benchmark datasets.
+
+==================================================
+KEEP EXISTING FEATURE ENGINEERING
+==================================================
+
+Do not replace the current feature engineering.
+
+Keep the existing leakage-safe features such as:
+
+- lag_1
+- lag_7
+- lag_14
+- lag_28
+- rolling_mean_7
+- rolling_mean_14
+- rolling_std_7
+- rolling_std_14
+- calendar features
+- change features
+- growth features
+
+Only use information available before the target being predicted.
+
+==================================================
+KEEP EXISTING FEATURE SELECTION
+==================================================
+
+Feature selection is the main part of the project.
+
+Keep the existing training-only feature selection process.
+
+The workflow should remain:
+
+Generate candidate features
+→ chronological train/test split
+→ training-only filtering
+→ Random Forest feature importance
+→ rank features
+→ select strongest features
+→ train model
+→ evaluate
+
+Show:
+
+- candidate features
+- features remaining after filtering
+- selected features
+- feature importance ranking
+- selected feature names
+
+==================================================
+KEEP EXISTING MODEL COMPARISON
+==================================================
+
+Keep the existing comparison:
+
+1. Naive baseline
+2. Basic features
+3. All engineered features
+4. Selected engineered features
+
+Keep the existing metrics:
+
+- MAE
+- RMSE
+- sMAPE
+
+Do not claim that selected features are better unless the actual results show that.
+
+==================================================
+EDA
+==================================================
+
+Make sure the existing EDA page works for:
+
+NN5
+M4
+M5
+
+Keep the current EDA style.
+
+Show useful third-year B.Tech-level analysis such as:
+
+- dataset shape
+- observations
+- missing values
+- descriptive statistics
+- distribution
+- time-series plot
+- rolling mean
+- rolling statistics
+
+Do not overcomplicate it.
+
+==================================================
+SIDEBAR
+==================================================
+
+Update the benchmark selector to:
+
+- NN5
+- M4
+- M5
+- Auto-detect
+
+Update "Interpret upload as" to:
+
+- Auto-detect
+- NN5
+- M4
+- M5
+
+Keep the current NN5 upload functionality unchanged.
+
+For M5, display the three-file upload interface only when M5 is selected.
+
+==================================================
+RESULTS / BENCHMARK COMPARISON
+==================================================
+
+Add or update a simple "Benchmark Comparison" section.
+
+It should allow actual experiments from:
+
+NN5
+M4
+M5
+
+to be compared.
+
+Example:
+
+Dataset | Series | Model/Feature Set | Features Used | MAE | RMSE | sMAPE
+
+Only show actual measured results.
+
+If M4/M5 has not been uploaded or evaluated, say:
+
+"Not evaluated — upload the benchmark dataset."
+
+Never create fake numbers.
+
+==================================================
+DOCUMENTATION
+==================================================
+
+Update the existing documentation only where necessary:
+
+README.md
+docs/PROJECT_OVERVIEW.md
+docs/METHODOLOGY.md
+docs/VIVA_GUIDE.md
+
+Explain briefly:
+
+- why multiple benchmark datasets are used
+- why M5 requires multiple files
+- how the M5 adapter combines the files
+- how different datasets are converted to a common representation
+- how the same feature-selection methodology is then applied
+
+Keep the explanation suitable for a third-year B.Tech Data Science project.
+
+==================================================
+TESTING
+==================================================
+
+Before saying the update is complete:
+
+1. Test the existing NN5 workflow.
+2. Test CSV upload.
+3. Test XLSX upload.
+4. Test M4 parsing.
+5. Test M5 multi-file parsing.
+6. Test M5 series selection.
+7. Test EDA.
+8. Test feature engineering.
+9. Test feature selection.
+10. Test forecasting.
+11. Test results.
+
+Run a syntax check.
+
+Run the Streamlit application.
+
+Do not tell me something works unless you actually verify it.
+
+==================================================
+VERY IMPORTANT
+==================================================
+
+I already have a working project.
+
+Make the SMALLEST CLEAN CHANGES necessary.
+
+Preserve the current application and UI as much as possible.
+
+The only major new functionality I want is:
+
+M4 support + proper MULTI-FILE M5 support.
+
+At the end, tell me:
+
+1. Files changed.
+2. What was added.
+3. How M4 works.
+4. How M5 works with its multiple CSV files.
+5. How I should upload M5 files.
+6. How I select an M5 series.
+7. Whether the existing NN5 workflow still works.
+8. Any limitations.
+
+Do not ask me to manually rewrite the existing application.
